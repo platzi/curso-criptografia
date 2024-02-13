@@ -3,6 +3,8 @@ import prng from "./prng";
 import cipher from "./cipher";
 import decipher from "./decipher";
 import { scrypt } from "crypto";
+import hash from "./hash";
+import hmac from "./hmac";
 
 const encoding = {
   alias: "enc",
@@ -21,7 +23,19 @@ const encoding = {
     "hex",
   ] as const,
   default: "hex",
-};
+} as const;
+
+const input = {
+  alias: "i",
+  type: "string",
+  demandOption: true,
+} as const;
+
+const output = {
+  alias: "o",
+  type: "string",
+  demandOption: true,
+} as const;
 
 const { argv } = yargs
   .options({})
@@ -74,16 +88,12 @@ const { argv } = yargs
         default: 128,
       },
       input: {
-        alias: "i",
+        ...input,
         description: "The file to encrypt",
-        type: "string",
-        demandOption: true,
       },
       output: {
-        alias: "o",
+        ...output,
         description: "The file to output the encrypted file to",
-        type: "string",
-        demandOption: true,
       },
     },
   })
@@ -109,16 +119,12 @@ const { argv } = yargs
         default: 128,
       },
       input: {
-        alias: "i",
+        ...input,
         description: "The file to decrypt",
-        type: "string",
-        demandOption: true,
       },
       output: {
-        alias: "o",
+        ...output,
         description: "The file to output the decrypted file to",
-        type: "string",
-        demandOption: true,
       },
     },
   })
@@ -144,6 +150,53 @@ const { argv } = yargs
         description: "The number of bytes to output",
         type: "number",
         default: 64,
+      },
+      encoding,
+    },
+  })
+  .command({
+    command: "hash",
+    describe: "Hash a file",
+    handler: ({ algorithm, encoding, input }) => {
+      console.log(hash(algorithm, encoding, input));
+    },
+    builder: {
+      algorithm: {
+        alias: "a",
+        description: "The algorithm to use",
+        type: "string",
+        demandOption: true,
+        default: "sha256",
+      },
+      input: {
+        ...input,
+        description: "The file to hash",
+      },
+      encoding,
+    },
+  })
+  .command({
+    command: "hmac",
+    describe: "Generate an HMAC for a file",
+    handler: ({ algorithm, key, encoding, input }) => {
+      console.log(hmac(algorithm, key, encoding, input));
+    },
+    builder: {
+      algorithm: {
+        alias: "a",
+        description: "The algorithm to use",
+        type: "string",
+        default: "sha256",
+      },
+      input: {
+        ...input,
+        description: "The file to hmac",
+      },
+      key: {
+        alias: "k",
+        description: "The key to use",
+        type: "string",
+        demandOption: true,
       },
       encoding,
     },
