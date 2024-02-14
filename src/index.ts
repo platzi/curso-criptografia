@@ -6,6 +6,9 @@ import { scrypt } from "crypto";
 import hash from "./hash";
 import hmac from "./hmac";
 import diffieHellman from "./diffie-hellman";
+import keypair from "./keypair";
+import sign from "./sign";
+import verify from "./verify";
 
 const encoding = {
   alias: "enc",
@@ -289,6 +292,117 @@ const { argv } = yargs
         default: "hex",
       },
       encoding,
+    },
+  })
+  .command({
+    command: "keypair",
+    describe: "Generate an assymetric key pair",
+    handler: ({ type, size, passphrase, outDir, outFormat, modulusLength }) => {
+      keypair(type, size, passphrase, outDir, outFormat, modulusLength);
+    },
+    builder: {
+      type: {
+        choices: ["rsa", "rsa-pss"] as const,
+        description: "The type of key pair to generate",
+        demandOption: true,
+      },
+      size: {
+        choices: [128, 192, 256] as const,
+        description: "The size of the passphrase",
+        default: 128,
+      },
+      passphrase: {
+        alias: "p",
+        description: "The passphrase to encrypt the private key with",
+        type: "string",
+        demandOption: true,
+      },
+      outDir: {
+        alias: "o",
+        description: "The directory to output the keys to",
+        type: "string",
+        default: "./.secrets",
+      },
+      outFormat: {
+        alias: "f",
+        description: "The format to output the keys in",
+        choices: ["pem", "der"] as const,
+        default: "pem",
+      },
+      modulusLength: {
+        alias: "m",
+        description: "The modulus length",
+        choices: [2048, 3072, 4096] as const,
+        default: 2048,
+      },
+    },
+  })
+  .command({
+    command: "sign",
+    describe: "Sign a file",
+    handler: ({ algorithm, input, privateKey, encoding, passphrase }) => {
+      console.log(sign(algorithm, input, privateKey, encoding, passphrase));
+    },
+    builder: {
+      algorithm: {
+        alias: "a",
+        description: "The algorithm to use",
+        type: "string",
+        default: "RSA-SHA256",
+      },
+      input: { ...input, description: "The file to sign" },
+      privateKey: {
+        ...input,
+        alias: "priv",
+        description: "The private key to sign with",
+      },
+      encoding,
+      passphrase: {
+        alias: "p",
+        description: "The passphrase to decrypt the private key",
+        type: "string",
+      },
+    },
+  })
+  .command({
+    command: "verify",
+    describe: "Verify a signature for a given file",
+    handler: ({
+      algorithm,
+      input,
+      publicKey,
+      signature,
+      signatureEncoding,
+    }) => {
+      console.log(
+        verify(algorithm, input, publicKey, signature, signatureEncoding)
+      );
+    },
+    builder: {
+      algorithm: {
+        alias: "a",
+        description: "The algorithm to use",
+        type: "string",
+        default: "RSA-SHA256",
+      },
+      input: { ...input, description: "The file to verify" },
+      publicKey: {
+        ...input,
+        alias: "pub",
+        description: "The public key to verify against",
+      },
+      signature: {
+        alias: "s",
+        description: "The signature to verify",
+        type: "string",
+        demandOption: true,
+      },
+      signatureEncoding: {
+        ...input,
+        alias: "se",
+        description: "The signature encoding",
+        default: "hex",
+      },
     },
   })
   .demandCommand(1, "You need at least one command before moving on")
