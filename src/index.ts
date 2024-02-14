@@ -5,6 +5,7 @@ import decipher from "./decipher";
 import { scrypt } from "crypto";
 import hash from "./hash";
 import hmac from "./hmac";
+import diffieHellman from "./diffie-hellman";
 
 const encoding = {
   alias: "enc",
@@ -201,7 +202,96 @@ const { argv } = yargs
       encoding,
     },
   })
+  .command({
+    command: "diffie-hellman",
+    describe:
+      "Compute keys for diffie-hellman exchange or compute secret from keys if provided",
+    aliases: ["dh"],
+    handler: ({
+      publicKey,
+      publicKeyEncoding,
+      encoding,
+      prime,
+      generator,
+      primeEncoding,
+      generatorEncoding,
+      privateKey,
+      privateKeyEncoding,
+    }) => {
+      console.log(
+        diffieHellman(
+          encoding,
+          publicKey && {
+            publicKey,
+            publicKeyEncoding,
+            prime,
+            primeEncoding,
+            generator,
+            generatorEncoding,
+            privateKey,
+            privateKeyEncoding,
+          }
+        )
+      );
+    },
+    builder: {
+      publicKey: {
+        alias: "pub",
+        description: "The other's public key",
+        type: "string",
+        implies: [
+          "publicKeyEncoding",
+          "privateKey",
+          "privateKeyEncoding",
+          "prime",
+          "primeEncoding",
+          "generator",
+          "generatorEncoding",
+        ],
+      },
+      publicKeyEncoding: {
+        ...encoding,
+        alias: "pube",
+        description: "Other's public key encoding",
+        default: "hex",
+      },
+      privateKey: {
+        alias: "priv",
+        description: "Own private key",
+        type: "string",
+      },
+      privateKeyEncoding: {
+        ...encoding,
+        alias: "prive",
+        description: "Own private key encoding",
+        default: "hex",
+      },
+      prime: {
+        alias: "p",
+        description: "The prime number",
+        type: "string",
+      },
+      primeEncoding: {
+        ...encoding,
+        alias: "pe",
+        description: "Prime number encoding",
+        default: "hex",
+      },
+      generator: {
+        alias: "g",
+        description: "The generator",
+        type: "string",
+      },
+      generatorEncoding: {
+        ...encoding,
+        alias: "ge",
+        description: "Generator encoding",
+        default: "hex",
+      },
+      encoding,
+    },
+  })
   .demandCommand(1, "You need at least one command before moving on")
   .help();
 
-console.log(argv);
+// console.log(argv);
