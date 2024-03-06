@@ -10,6 +10,7 @@ import keypair from "./keypair";
 import sign from "./sign";
 import verify from "./verify";
 
+// Se definen opciones constantes para seleccionar la codificación y gestión de archivos
 const encoding = {
   alias: "enc",
   choices: [
@@ -41,8 +42,10 @@ const output = {
   demandOption: true,
 } as const;
 
+// Se define el objeto yargs y configura los comandos disponibles
 const { argv } = yargs
   .options({})
+   // Se genera el comando para generar un número aleatorio
   .command({
     command: "prng",
     describe: "Generar un numero aleatrio",
@@ -70,6 +73,7 @@ const { argv } = yargs
       },
     },
   })
+  // Comienza la creacion de otros comandos (descifrado, cifrado, scrypt, hash, hmac, etc.)
   .command({
     command: "cipher",
     describe: "Encrypt a file",
@@ -406,6 +410,7 @@ const { argv } = yargs
     },
   })
   .demandCommand(1, "You need at least one command before moving on")
+  // Se muestra la ayuda 
   .help();
 
 // console.log(argv);
